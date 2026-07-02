@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Checkout | Market Lane Global</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body data-page="checkout">
+    <header class="site-header">
+      <a class="brand" href="/">Market Lane Global</a>
+      <nav class="nav-actions" aria-label="Primary navigation">
+        <div class="region-switch" aria-label="Store region">
+          <button class="region-option" type="button" data-region="india">India</button>
+          <button class="region-option" type="button" data-region="international">International</button>
+        </div>
+        <a href="/">Products</a>
+        <button class="link-button" id="ordersButton" type="button">Orders</button>
+        <button class="cart-button" id="cartButton" type="button" aria-label="Open cart">
+          Cart <span id="cartCount">0</span>
+        </button>
+        <span class="account-label" id="accountLabel"></span>
+        <button class="secondary-button" id="authButton" type="button">Sign in</button>
+        <button class="ghost-button" id="logoutButton" type="button" hidden>Sign out</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="checkout-layout">
+        <form class="checkout-form" id="checkoutForm">
+          <div>
+            <p class="eyebrow" id="checkoutEyebrow">Checkout</p>
+            <h1 id="checkoutTitle">Shipping details</h1>
+          </div>
+          <label class="field">
+            <span>Full name</span>
+            <input name="fullName" autocomplete="name" required>
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" autocomplete="email" required>
+          </label>
+          <label class="field">
+            <span>Address</span>
+            <input name="address" autocomplete="street-address" required>
+          </label>
+          <div class="field-grid">
+            <label class="field">
+              <span id="cityLabel">City</span>
+              <input name="city" autocomplete="address-level2" required>
+            </label>
+            <label class="field">
+              <span id="stateLabel">State</span>
+              <input name="state" autocomplete="address-level1" required>
+            </label>
+            <label class="field">
+              <span id="zipLabel">ZIP</span>
+              <input name="zip" autocomplete="postal-code" required>
+            </label>
+          </div>
+          <p class="form-message" id="checkoutMessage"></p>
+          <button class="primary-button" type="submit">Place order</button>
+        </form>
+
+        <aside class="checkout-summary">
+          <h2>Order summary</h2>
+          <div id="checkoutItems"></div>
+          <div class="totals">
+            <div><span>Subtotal</span><strong id="summarySubtotal">$0.00</strong></div>
+            <div><span id="summaryShippingLabel">Shipping</span><strong id="summaryShipping">$0.00</strong></div>
+            <div><span id="summaryTaxLabel">Estimated tax</span><strong id="summaryTax">$0.00</strong></div>
+            <div class="total-line"><span>Total</span><strong id="summaryTotal">$0.00</strong></div>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <aside class="drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h2>Your cart</h2>
+          <button class="icon-button" id="closeCartButton" type="button" aria-label="Close cart">x</button>
+        </div>
+        <div class="drawer-content" id="cartItems"></div>
+        <div class="cart-summary">
+          <div>
+            <span>Subtotal</span>
+            <strong id="cartSubtotal">$0.00</strong>
+          </div>
+          <a class="primary-button full-width" href="/checkout.html" id="checkoutLink">Checkout</a>
+        </div>
+      </div>
+    </aside>
+
+    <dialog class="modal" id="authModal">
+      <form class="modal-panel" id="authForm" method="dialog">
+        <div class="modal-header">
+          <h2 id="authTitle">Sign in</h2>
+          <button class="icon-button" id="closeAuthButton" type="button" aria-label="Close">x</button>
+        </div>
+        <div class="segmented-control" role="tablist">
+          <button class="segment active" id="loginTab" type="button">Login</button>
+          <button class="segment" id="registerTab" type="button">Register</button>
+        </div>
+        <div class="social-login" aria-label="Social sign in">
+          <button class="social-button google" type="button" data-provider="google">
+            <span class="provider-mark" aria-hidden="true">G</span>
+            Continue with Google
+          </button>
+          <button class="social-button apple" type="button" data-provider="apple">
+            <span class="provider-mark" aria-hidden="true">A</span>
+            Continue with Apple ID
+          </button>
+          <button class="social-button microsoft" type="button" data-provider="microsoft">
+            <span class="provider-mark" aria-hidden="true">M</span>
+            Continue with Microsoft
+          </button>
+        </div>
+        <div class="divider"><span>or</span></div>
+        <label class="field" id="nameField" hidden>
+          <span>Name</span>
+          <input name="name" autocomplete="name">
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" autocomplete="email" required>
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <p class="form-message" id="authMessage"></p>
+        <button class="primary-button full-width" type="submit" id="authSubmit">Sign in</button>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="ordersModal">
+      <div class="modal-panel wide">
+        <div class="modal-header">
+          <h2>Orders</h2>
+          <button class="icon-button" id="closeOrdersButton" type="button" aria-label="Close">x</button>
+        </div>
+        <div class="orders-list" id="ordersList"></div>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
