@@ -204,40 +204,6 @@ function renderAuthMode() {
   $("#loginTab").classList.toggle("active", !isRegister);
   $("#registerTab").classList.toggle("active", isRegister);
   setMessage("#authMessage", "");
-
-  // Show/hide password strength and confirm password only during registration
-  const pwStrengthWrap = $("#pwStrengthWrap");
-  const confirmPwField = $("#confirmPasswordField");
-  const consentField = $("#consentField");
-  const forgotLink = $("#forgotLink");
-  const passwordInput = $("#passwordInput");
-
-  if (pwStrengthWrap) {
-    if (isRegister) {
-      pwStrengthWrap.classList.add("visible");
-    } else {
-      pwStrengthWrap.classList.remove("visible");
-      resetPasswordStrength();
-    }
-  }
-  if (confirmPwField) {
-    if (isRegister) {
-      confirmPwField.classList.add("visible");
-    } else {
-      confirmPwField.classList.remove("visible");
-    }
-  }
-  if (consentField) {
-    if (isRegister) {
-      consentField.classList.add("visible");
-    } else {
-      consentField.classList.remove("visible");
-    }
-  }
-  if (forgotLink) forgotLink.style.display = isRegister ? "none" : "";
-  if (passwordInput) {
-    passwordInput.autocomplete = isRegister ? "new-password" : "current-password";
-  }
 }
 
 function openCart() {
@@ -542,79 +508,6 @@ async function signInWithProvider(provider) {
   );
 }
 
-// ─── Password strength utilities ─────────────────────────────────────────────
-
-const PW_REQUIREMENTS = [
-  { id: "req-len",     test: (pw) => pw.length >= 8 },
-  { id: "req-upper",  test: (pw) => /[A-Z]/.test(pw) },
-  { id: "req-lower",  test: (pw) => /[a-z]/.test(pw) },
-  { id: "req-num",    test: (pw) => /[0-9]/.test(pw) },
-  { id: "req-special",test: (pw) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(pw) }
-];
-
-const STRENGTH_LEVELS = [
-  { label: "Very weak",  cls: "s1" },
-  { label: "Weak",       cls: "s2" },
-  { label: "Fair",       cls: "s3" },
-  { label: "Strong",     cls: "s4" }
-];
-
-function checkPasswordStrength(password) {
-  if (!password) return 0;
-  const metCount = PW_REQUIREMENTS.filter((r) => r.test(password)).length;
-  if (metCount <= 1) return 1;
-  if (metCount === 2) return 2;
-  if (metCount === 3 || metCount === 4) return 3;
-  return 4;
-}
-
-function resetPasswordStrength() {
-  for (let i = 1; i <= 4; i++) {
-    const seg = $(`#pws${i}`);
-    if (seg) seg.className = "pw-strength-segment";
-  }
-  const label = $("#pwStrengthLabel");
-  if (label) { label.textContent = "Strength"; label.className = "pw-strength-label"; }
-  PW_REQUIREMENTS.forEach((r) => {
-    const li = $(`#${r.id}`);
-    if (li) li.classList.remove("met");
-  });
-}
-
-function updatePasswordStrength(password) {
-  const score = checkPasswordStrength(password);
-  const level = STRENGTH_LEVELS[score - 1];
-
-  for (let i = 1; i <= 4; i++) {
-    const seg = $(`#pws${i}`);
-    if (!seg) continue;
-    seg.className = "pw-strength-segment" + (i <= score ? ` filled-${score}` : "");
-  }
-
-  const label = $("#pwStrengthLabel");
-  if (label) {
-    label.textContent = password ? (level ? level.label : "Strength") : "Strength";
-    label.className = "pw-strength-label" + (password && level ? ` ${level.cls}` : "");
-  }
-
-  PW_REQUIREMENTS.forEach((r) => {
-    const li = $(`#${r.id}`);
-    if (li) li.classList.toggle("met", r.test(password));
-  });
-}
-
-function togglePasswordVisibility(inputId, btn) {
-  const input = $(inputId ? `#${inputId}` : null) || btn.previousElementSibling;
-  if (!input) return;
-  const isText = input.type === "text";
-  input.type = isText ? "password" : "text";
-  const eyePath = isText
-    ? `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`
-    : `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`;
-  btn.querySelector("svg").innerHTML = eyePath;
-  btn.setAttribute("aria-label", isText ? "Show password" : "Hide password");
-}
-
 function bindGlobalEvents() {
   document.querySelectorAll("[data-region]").forEach((button) => {
     button.addEventListener("click", () => setRegion(button.dataset.region));
@@ -652,27 +545,6 @@ function bindGlobalEvents() {
     const endpoint = state.authMode === "register" ? "/api/register" : "/api/login";
     setMessage("#authMessage", "");
 
-    // Extra validation for registration
-    if (state.authMode === "register") {
-      const pw = $("#passwordInput")?.value || "";
-      const confirmPw = $("#confirmPasswordInput")?.value || "";
-      const consent = $("#consentCheckbox")?.checked;
-
-      const allMet = PW_REQUIREMENTS.every((r) => r.test(pw));
-      if (!allMet) {
-        setMessage("#authMessage", "Please meet all password requirements.");
-        return;
-      }
-      if (pw !== confirmPw) {
-        setMessage("#authMessage", "Passwords do not match.");
-        return;
-      }
-      if (!consent) {
-        setMessage("#authMessage", "Please agree to the Terms of Service and Privacy Policy.");
-        return;
-      }
-    }
-
     try {
       const data = await api(endpoint, {
         method: "POST",
@@ -680,8 +552,6 @@ function bindGlobalEvents() {
       });
       state.user = data.user;
       form.reset();
-      resetPasswordStrength();
-      $("#pwStrengthWrap")?.classList.remove("visible");
       $("#authModal")?.close();
       await loadCart();
       if (document.body.dataset.page === "checkout") renderCheckout();
@@ -734,23 +604,6 @@ function bindGlobalEvents() {
 
   $("#ordersButton")?.addEventListener("click", renderOrders);
   $("#closeOrdersButton")?.addEventListener("click", () => $("#ordersModal")?.close());
-
-  // Password visibility toggles
-  $("#pwToggle")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    togglePasswordVisibility("passwordInput", $("#pwToggle"));
-  });
-  $("#confirmPwToggle")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    togglePasswordVisibility("confirmPasswordInput", $("#confirmPwToggle"));
-  });
-
-  // Password strength meter — only active during registration
-  $("#passwordInput")?.addEventListener("input", () => {
-    if (state.authMode === "register") {
-      updatePasswordStrength($("#passwordInput").value);
-    }
-  });
 }
 
 async function boot() {
